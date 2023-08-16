@@ -1,6 +1,8 @@
 package main
 
 import (
+	"GoNews/pcg/typeStruct"
+
 	"github.com/mmcdole/gofeed"
 )
 
@@ -9,8 +11,8 @@ type Config struct {
 	RequestPeriod int      `json:"request_period"`
 }
 
-func ParseRSS(url string) ([]Post, error) {
-	var posts []Post
+func ParseRSS(url string) ([]typeStruct.Post, error) {
+	var posts []typeStruct.Post
 
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(url)
@@ -23,7 +25,7 @@ func ParseRSS(url string) ([]Post, error) {
 			break
 		}
 
-		post := Post{
+		post := typeStruct.Post{
 			Title:   item.Title,
 			Content: item.Description,
 			PubTime: item.PublishedParsed.Unix(),

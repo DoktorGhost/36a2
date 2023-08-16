@@ -1,6 +1,7 @@
 package main
 
 import (
+	"GoNews/pcg/typeStruct"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -24,7 +25,7 @@ func main() {
 	}
 
 	var wg sync.WaitGroup
-	postsCh := make(chan []Post, len(config.RSSLinks))
+	postsCh := make(chan []typeStruct.Post, len(config.RSSLinks))
 
 	ticker := time.NewTicker(time.Duration(config.RequestPeriod) * time.Minute)
 
