@@ -1,13 +1,11 @@
 package typeStruct
 
-import "time"
-
 type Post struct {
-	ID      int       // номер записи
-	Title   string    // заголовок публикации
-	Content string    // содержание публикации
-	PubTime time.Time // время публикации
-	Link    string    // ссылка на источник
+	ID      int    // номер записи
+	Title   string // заголовок публикации
+	Content string // содержание публикации
+	PubTime string // время публикации
+	Link    string // ссылка на источник
 }
 
 /*
@@ -26,7 +24,7 @@ func (p *Post) GetSummary() string {
 	return p.Content
 }
 
-func NewPost(title, content, link string, pubTime time.Time) Post {
+func NewPost(title, content, link string, pubTime string) Post {
 	return Post{
 		Title:   title,
 		Content: content,

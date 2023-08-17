@@ -1,6 +1,7 @@
 package main
 
 import (
+	"GoNews/pcg/parse"
 	"GoNews/pcg/typeStruct"
 	"encoding/json"
 	"fmt"
@@ -17,7 +18,7 @@ func main() {
 		return
 	}
 
-	var config Config
+	var config parse.Config
 	err = json.Unmarshal(configData, &config)
 	if err != nil {
 		fmt.Println("Error parsing config file:", err)
@@ -34,7 +35,7 @@ func main() {
 		case <-ticker.C:
 			fmt.Println("Regularly fetching RSS feeds...")
 			for _, rssLink := range config.RSSLinks {
-				posts, err := ParseRSS(rssLink)
+				posts, err := parse.ParseRSS(rssLink)
 				if err != nil {
 					fmt.Printf("Error parsing RSS %s: %v\n", rssLink, err)
 					continue
@@ -42,7 +43,7 @@ func main() {
 
 				for i, post := range posts {
 					fmt.Printf("Post %d:\nTitle: %s\nContent: %s\nPubTime: %s\nLink: %s\n\n",
-						i+1, post.Title, post.Content, post.FormatPubTime(), post.Link)
+						i+1, post.Title, post.Content, post.PubTime, post.Link)
 				}
 			}
 		}
@@ -53,7 +54,7 @@ func main() {
 		go func(link string) {
 			defer wg.Done()
 
-			posts, err := ParseRSS(link)
+			posts, err := parse.ParseRSS(link)
 			if err != nil {
 				fmt.Printf("Error parsing RSS %s: %v\n", link, err)
 				postsCh <- nil
@@ -71,7 +72,7 @@ func main() {
 		if posts != nil {
 			for i, post := range posts {
 				fmt.Printf("Post %d:\nTitle: %s\nContent: %s\nPubTime: %s\nLink: %s\n\n",
-					i+1, post.Title, post.Content, post.FormatPubTime(), post.Link)
+					i+1, post.Title, post.Content, post.PubTime, post.Link)
 			}
 		}
 	}

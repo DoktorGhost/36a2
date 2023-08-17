@@ -14,7 +14,7 @@ func TestSaveAndReadFromDB(t *testing.T) {
 
 	// Создаем тестовый пост
 	testPost := typeStruct.Post{
-		Title:   "Test Title",
+		Title:   "Test Title 2",
 		Content: "Test Content",
 		PubTime: time.Unix(16, 0),
 		Link:    "http://example.com/test",
@@ -27,7 +27,7 @@ func TestSaveAndReadFromDB(t *testing.T) {
 	}
 
 	// Читаем пост из базы данных по названию
-	readPost, err := readFromDB("Test Title") // Используем название для поиска
+	readPost, err := readFromDB("Test Title 2") // Используем название для поиска
 	if err != nil {
 		t.Fatalf("Failed to read post from DB: %v", err)
 	}
