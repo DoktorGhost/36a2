@@ -20,10 +20,7 @@ func ParseRSS(url string) ([]typeStruct.Post, error) {
 		return nil, err
 	}
 
-	for i, item := range feed.Items {
-		if i >= 1 {
-			break
-		}
+	for _, item := range feed.Items {
 
 		post := typeStruct.Post{
 			Title:   item.Title,

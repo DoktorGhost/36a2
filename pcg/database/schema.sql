@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS news (
     id SERIAL PRIMARY KEY,
-    title TEXT,
+    title TEXT UNIQUE,
     description TEXT,
     pub_date TEXT,
     source TEXT

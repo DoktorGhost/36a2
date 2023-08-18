@@ -17,11 +17,10 @@ type API struct {
 	rssLinks []string
 }
 
-func NewAPI(db *sql.DB, rssLinks []string) *API {
+func NewAPI(db *sql.DB) *API {
 	api := &API{
-		r:        mux.NewRouter(),
-		db:       db,
-		rssLinks: rssLinks,
+		r:  mux.NewRouter(),
+		db: db,
 	}
 
 	api.endpoints()
@@ -65,7 +64,7 @@ func (api *API) endpoints() {
 	api.r.PathPrefix("/").HandlerFunc(api.webAppHandler).Methods(http.MethodGet)
 }
 
-func StartAPI(port string, db *sql.DB, rssLinks []string) error {
-	api := NewAPI(db, rssLinks)
+func StartAPI(port string, db *sql.DB) error {
+	api := NewAPI(db)
 	return http.ListenAndServe(":"+port, api)
 }

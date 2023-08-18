@@ -17,12 +17,11 @@ import (
 func TestAPI_Posts(t *testing.T) {
 	// Инициализация реальной базы данных
 	database.InitDB()
-
 	// Завершение работы с базой данных после теста
 	defer database.DB.Close()
 
 	// Создание API
-	api := api.NewAPI(database.DB, nil)
+	api := api.NewAPI(database.DB)
 
 	// Добавляем 5 тестовых постов в базу данных
 	for i := 1; i <= 5; i++ {
@@ -64,6 +63,7 @@ func TestAPI_Posts(t *testing.T) {
 	for i := 0; i < len(expectedPosts); i++ {
 		assert.Equal(t, expectedPosts[i].Title, responsePosts[i].Title, "Title doesn't match")
 		assert.Equal(t, expectedPosts[i].Content, responsePosts[i].Content, "Content doesn't match")
-		// Проверьте остальные поля
+		assert.Equal(t, expectedPosts[i].PubTime, responsePosts[i].PubTime, "PubTime doesn't match")
+		assert.Equal(t, expectedPosts[i].Link, responsePosts[i].Link, "Link doesn't match")
 	}
 }

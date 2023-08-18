@@ -5,7 +5,7 @@ ENV POSTGRES_PASSWORD qwerty123
 ENV POSTGRES_DB testdb
 
 # Копирование файла schema.sql внутрь контейнера
-COPY db/schema.sql /docker-entrypoint-initdb.d/
+COPY pcg/database/schema.sql /docker-entrypoint-initdb.d/
 
 # Установка правильных разрешений на файл
 RUN chmod 755 /docker-entrypoint-initdb.d/schema.sql

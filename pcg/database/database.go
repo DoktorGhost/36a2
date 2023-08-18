@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 
 	_ "github.com/lib/pq"
 )
@@ -20,7 +19,7 @@ const (
 
 var DB *sql.DB
 
-func InitDB() {
+func InitDB() *sql.DB {
 	dbInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		DBHost, DBPort, DBUser, DBPassword, DBName)
 	var err error
@@ -28,24 +27,7 @@ func InitDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func CreateTable() {
-	schemaSQL, err := os.ReadFile("schema.sql")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = DB.Exec(string(schemaSQL))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Добавьте ограничение уникальности на поле title
-	_, err = DB.Exec("ALTER TABLE news ADD CONSTRAINT unique_title UNIQUE (title)")
-	if err != nil {
-		log.Fatal(err)
-	}
+	return DB
 }
 
 func SaveToDB(post typeStruct.Post) error {

@@ -1,79 +1,88 @@
 package main
 
 import (
-	"GoNews/pcg/parse"
-	"GoNews/pcg/typeStruct"
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
-	"sync"
+	"os/signal"
+	"syscall"
 	"time"
+
+	"GoNews/pcg/api"
+	"GoNews/pcg/database"
+	"GoNews/pcg/parse"
 )
 
 func main() {
-	configPath := "config.json"
-	configData, err := os.ReadFile(configPath)
+	// Чтение конфигурационного файла
+	configFile, err := os.Open("config.json")
 	if err != nil {
-		fmt.Println("Error reading config file:", err)
-		return
+		log.Fatal("Failed to open config file:", err)
 	}
+	defer configFile.Close()
 
 	var config parse.Config
-	err = json.Unmarshal(configData, &config)
+	err = json.NewDecoder(configFile).Decode(&config)
 	if err != nil {
-		fmt.Println("Error parsing config file:", err)
-		return
+		log.Fatal("Failed to decode config file:", err)
 	}
 
-	var wg sync.WaitGroup
-	postsCh := make(chan []typeStruct.Post, len(config.RSSLinks))
+	// Инициализация базы данных
+	db := database.InitDB()
+	defer db.Close()
 
-	ticker := time.NewTicker(time.Duration(config.RequestPeriod) * time.Minute)
+	// Создание API сервера
+	apiPort := "8080"
+	go func() {
+		err := api.StartAPI(apiPort, db)
+		if err != nil {
+			log.Fatal("Error starting API server:", err)
+		}
+	}()
 
+	// Создание канала для завершения
+	stopCh := make(chan struct{})
+
+	// Обработка сигнала завершения
+	go func() {
+		sigCh := make(chan os.Signal, 1)
+		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+		<-sigCh
+		close(stopCh)
+	}()
+
+	// Запуск обхода RSS-лент
+	for _, rssLink := range config.RSSLinks {
+		go startParsingRoutine(rssLink, config.RequestPeriod, stopCh, db)
+	}
+
+	// Ожидание завершения
+	<-stopCh
+	fmt.Println("Application has been stopped.")
+}
+
+func startParsingRoutine(url string, period int, stopCh <-chan struct{}, db *sql.DB) {
 	for {
 		select {
-		case <-ticker.C:
-			fmt.Println("Regularly fetching RSS feeds...")
-			for _, rssLink := range config.RSSLinks {
-				posts, err := parse.ParseRSS(rssLink)
-				if err != nil {
-					fmt.Printf("Error parsing RSS %s: %v\n", rssLink, err)
-					continue
-				}
-
-				for i, post := range posts {
-					fmt.Printf("Post %d:\nTitle: %s\nContent: %s\nPubTime: %s\nLink: %s\n\n",
-						i+1, post.Title, post.Content, post.PubTime, post.Link)
-				}
-			}
-		}
-	}
-
-	for _, rssLink := range config.RSSLinks {
-		wg.Add(1)
-		go func(link string) {
-			defer wg.Done()
-
-			posts, err := parse.ParseRSS(link)
+		case <-stopCh:
+			return
+		default:
+			posts, err := parse.ParseRSS(url)
 			if err != nil {
-				fmt.Printf("Error parsing RSS %s: %v\n", link, err)
-				postsCh <- nil
-				return
+				log.Println("Failed to parse RSS:", err)
+				continue
 			}
 
-			postsCh <- posts
-		}(rssLink)
-	}
-
-	wg.Wait()
-	close(postsCh)
-
-	for posts := range postsCh {
-		if posts != nil {
-			for i, post := range posts {
-				fmt.Printf("Post %d:\nTitle: %s\nContent: %s\nPubTime: %s\nLink: %s\n\n",
-					i+1, post.Title, post.Content, post.PubTime, post.Link)
+			for _, post := range posts {
+				err := database.SaveToDB(post)
+				if err != nil {
+					log.Println("Failed to save post to DB:", err)
+				}
 			}
+
+			time.Sleep(time.Duration(period) * time.Minute)
 		}
 	}
 }

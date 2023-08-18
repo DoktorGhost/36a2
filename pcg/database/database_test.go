@@ -48,7 +48,7 @@ func TestDeleteByTitle(t *testing.T) {
 
 	// Создаем тестовый пост
 	testPost := typeStruct.Post{
-		Title:   "Test Title 3",
+		Title:   "Test Title 1",
 		Content: "Test Content",
 		PubTime: "12/09/1994 14:23:09",
 		Link:    "http://example.com/test",
