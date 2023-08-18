@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"GoNews/pcg/typeStruct"
@@ -18,42 +18,43 @@ const (
 	DBName     = "testdb"
 )
 
-var db *sql.DB
+var DB *sql.DB
 
-func initDB() {
+func InitDB() {
 	dbInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		DBHost, DBPort, DBUser, DBPassword, DBName)
 	var err error
-	db, err = sql.Open("postgres", dbInfo)
+	DB, err = sql.Open("postgres", dbInfo)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func createTable() {
+func CreateTable() {
 	schemaSQL, err := os.ReadFile("schema.sql")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = db.Exec(string(schemaSQL))
+	_, err = DB.Exec(string(schemaSQL))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Добавьте ограничение уникальности на поле title
-	_, err = db.Exec("ALTER TABLE news ADD CONSTRAINT unique_title UNIQUE (title)")
+	_, err = DB.Exec("ALTER TABLE news ADD CONSTRAINT unique_title UNIQUE (title)")
 	if err != nil {
 		log.Fatal(err)
 	}
 }
-func saveToDB(post typeStruct.Post) error {
+
+func SaveToDB(post typeStruct.Post) error {
 	query := `
 		INSERT INTO news (title, description, pub_date, source)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id
 	`
-	row := db.QueryRow(query, post.Title, post.Content, post.PubTime, post.Link)
+	row := DB.QueryRow(query, post.Title, post.Content, post.PubTime, post.Link)
 	var id int
 	err := row.Scan(&id)
 	if err != nil {
@@ -63,7 +64,7 @@ func saveToDB(post typeStruct.Post) error {
 	return nil
 }
 
-func readFromDB(title string) (typeStruct.Post, error) {
+func ReadFromDB(title string) (typeStruct.Post, error) {
 	var post typeStruct.Post
 
 	query := `
@@ -71,11 +72,47 @@ func readFromDB(title string) (typeStruct.Post, error) {
 		FROM news
 		WHERE title = $1
 	`
-	row := db.QueryRow(query, title)
+	row := DB.QueryRow(query, title)
 	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.PubTime, &post.Link)
 	if err != nil {
 		return post, err
 	}
 
 	return post, nil
+}
+
+func GetLatestPosts(n int) ([]typeStruct.Post, error) {
+	query := `
+		SELECT id, title, description, pub_date, source
+		FROM news
+		ORDER BY pub_date DESC
+		LIMIT $1
+	`
+	rows, err := DB.Query(query, n)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []typeStruct.Post
+
+	for rows.Next() {
+		var post typeStruct.Post
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.PubTime, &post.Link)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}
+
+func DeleteByTitle(title string) error {
+	_, err := DB.Exec("DELETE FROM news WHERE title = $1", title)
+	return err
 }
