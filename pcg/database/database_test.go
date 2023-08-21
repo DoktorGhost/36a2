@@ -17,7 +17,7 @@ func TestSaveAndReadFromDB(t *testing.T) {
 	testPost := typeStruct.Post{
 		Title:   "Test Title 2",
 		Content: "Test Content",
-		PubTime: "12/09/1994 14:23:09",
+		PubTime: 1692645688,
 		Link:    "http://example.com/test",
 	}
 
@@ -28,14 +28,15 @@ func TestSaveAndReadFromDB(t *testing.T) {
 	}
 
 	// Читаем пост из базы данных по названию
-	readPost, err := ReadFromDB("Test Title 2") // Используем название для поиска
+	readPost, err := ReadFromDB("Test Title 2")
 	if err != nil {
 		t.Fatalf("Failed to read post from DB: %v", err)
 	}
 
-	// Сравниваем значения, исключая дату публикации
+	// Сравниваем значения
 	if readPost.Title != testPost.Title ||
 		readPost.Content != testPost.Content ||
+		readPost.PubTime != testPost.PubTime ||
 		readPost.Link != testPost.Link {
 		t.Errorf("Saved data doesn't match expected data.")
 	}
@@ -50,7 +51,7 @@ func TestDeleteByTitle(t *testing.T) {
 	testPost := typeStruct.Post{
 		Title:   "Test Title 1",
 		Content: "Test Content",
-		PubTime: "12/09/1994 14:23:09",
+		PubTime: 1692645688,
 		Link:    "http://example.com/test",
 	}
 

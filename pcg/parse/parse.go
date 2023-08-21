@@ -2,13 +2,32 @@ package parse
 
 import (
 	"GoNews/pcg/typeStruct"
+	"strings"
+	"time"
 
 	"github.com/mmcdole/gofeed"
+	"golang.org/x/net/html"
 )
 
 type Config struct {
 	RSSLinks      []string `json:"rss"`
 	RequestPeriod int      `json:"request_period"`
+}
+
+func CleanHTMLTags(input string) string {
+	tokenizer := html.NewTokenizer(strings.NewReader(input))
+	var cleanedText string
+
+	for {
+		tokenType := tokenizer.Next()
+		switch tokenType {
+		case html.ErrorToken:
+			return cleanedText
+		case html.TextToken:
+			text := tokenizer.Token().Data
+			cleanedText += text
+		}
+	}
 }
 
 func ParseRSS(url string) ([]typeStruct.Post, error) {
@@ -21,11 +40,16 @@ func ParseRSS(url string) ([]typeStruct.Post, error) {
 	}
 
 	for _, item := range feed.Items {
+		// Parse PubTime using the given format
+		pubTime, err := time.Parse("Mon, 2 Jan 2006 15:04:05 MST", item.Published)
+		if err != nil {
+			return nil, err
+		}
 
 		post := typeStruct.Post{
 			Title:   item.Title,
-			Content: item.Description,
-			PubTime: item.Published,
+			Content: CleanHTMLTags(item.Description),
+			PubTime: pubTime.Unix(),
 			Link:    item.Link,
 		}
 		posts = append(posts, post)
@@ -45,10 +69,16 @@ func ParseRSSFixture(fixtureXML string) ([]typeStruct.Post, error) {
 	}
 
 	for _, item := range feed.Items {
+		// Parse PubTime using the given format
+		pubTime, err := time.Parse("Mon, 2 Jan 2006 15:04:05 MST", item.Published)
+		if err != nil {
+			return nil, err
+		}
+
 		post := typeStruct.Post{
 			Title:   item.Title,
-			Content: item.Description,
-			PubTime: item.Published,
+			Content: CleanHTMLTags(item.Description),
+			PubTime: pubTime.Unix(),
 			Link:    item.Link,
 		}
 		posts = append(posts, post)

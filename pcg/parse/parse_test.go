@@ -2,6 +2,7 @@ package parse_test
 
 import (
 	"testing"
+	"time"
 
 	"GoNews/pcg/parse"
 	"GoNews/pcg/typeStruct"
@@ -17,13 +18,13 @@ func TestParseRSS(t *testing.T) {
 				<item>
 					<title>Test Title 1</title>
 					<description>Test Description 1</description>
-					<pubDate>2023-08-16T10:00:00Z</pubDate>
+					<pubDate>Mon, 21 Aug 2023 19:21:28 GMT</pubDate>
 					<link>http://example.com/test1</link>
 				</item>
 				<item>
 					<title>Test Title 2</title>
 					<description>Test Description 2</description>
-					<pubDate>2023-08-16T11:00:00Z</pubDate>
+					<pubDate>Mon, 21 Aug 2023 20:21:28 GMT</pubDate>
 					<link>http://example.com/test2</link>
 				</item>
 			</channel>
@@ -42,13 +43,13 @@ func TestParseRSS(t *testing.T) {
 		{
 			Title:   "Test Title 1",
 			Content: "Test Description 1",
-			PubTime: "2023-08-16T10:00:00Z",
+			PubTime: time.Date(2023, 8, 21, 19, 21, 28, 0, time.UTC).Unix(),
 			Link:    "http://example.com/test1",
 		},
 		{
 			Title:   "Test Title 2",
 			Content: "Test Description 2",
-			PubTime: "2023-08-16T11:00:00Z",
+			PubTime: time.Date(2023, 8, 21, 20, 21, 28, 0, time.UTC).Unix(),
 			Link:    "http://example.com/test2",
 		},
 	}

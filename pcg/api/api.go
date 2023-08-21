@@ -43,14 +43,12 @@ func (api *API) posts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Получить n последних новостей из базы данных
 	posts, err := database.GetLatestPosts(n)
 	if err != nil {
 		http.Error(w, "Не удалось получить новости", http.StatusInternalServerError)
 		return
 	}
 
-	// Отправить ответ в формате JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
 }

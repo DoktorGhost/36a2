@@ -28,7 +28,7 @@ func TestAPI_Posts(t *testing.T) {
 		testPost := typeStruct.Post{
 			Title:   fmt.Sprintf("Test Title %d", i),
 			Content: "Test Content",
-			PubTime: "12/09/1994 14:23:09",
+			PubTime: 1692644239,
 			Link:    "http://example.com/test",
 		}
 		err := database.SaveToDB(testPost)
