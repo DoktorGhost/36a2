@@ -9,6 +9,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Константы для настройки подключения к базе данных
 const (
 	DBHost     = "localhost"
 	DBPort     = "5432"
@@ -19,6 +20,7 @@ const (
 
 var DB *sql.DB
 
+// Инициализация базы данных
 func InitDB() *sql.DB {
 	dbInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		DBHost, DBPort, DBUser, DBPassword, DBName)
@@ -30,6 +32,7 @@ func InitDB() *sql.DB {
 	return DB
 }
 
+// Сохранение новости в базе данных
 func SaveToDB(post typeStruct.Post) error {
 	query := `
 		INSERT INTO news (title, description, pub_date, source)
@@ -46,6 +49,7 @@ func SaveToDB(post typeStruct.Post) error {
 	return nil
 }
 
+// Чтение новости из базы данных по названию
 func ReadFromDB(title string) (typeStruct.Post, error) {
 	var post typeStruct.Post
 
@@ -63,6 +67,7 @@ func ReadFromDB(title string) (typeStruct.Post, error) {
 	return post, nil
 }
 
+// Получение n последних новостей из базы данных
 func GetLatestPosts(n int) ([]typeStruct.Post, error) {
 	query := `
 		SELECT id, title, description, pub_date, source
@@ -94,6 +99,7 @@ func GetLatestPosts(n int) ([]typeStruct.Post, error) {
 	return posts, nil
 }
 
+// Удаление новости из базы данных по названию
 func DeleteByTitle(title string) error {
 	_, err := DB.Exec("DELETE FROM news WHERE title = $1", title)
 	return err

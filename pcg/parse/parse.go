@@ -9,11 +9,13 @@ import (
 	"golang.org/x/net/html"
 )
 
+// Config представляет структуру для конфигурации парсера.
 type Config struct {
 	RSSLinks      []string `json:"rss"`
 	RequestPeriod int      `json:"request_period"`
 }
 
+// CleanHTMLTags удаляет HTML-теги из текста и возвращает очищенный текст.
 func CleanHTMLTags(input string) string {
 	tokenizer := html.NewTokenizer(strings.NewReader(input))
 	var cleanedText string
@@ -30,6 +32,7 @@ func CleanHTMLTags(input string) string {
 	}
 }
 
+// ParseRSS выполняет парсинг RSS-ленты по указанному URL и возвращает список постов.
 func ParseRSS(url string) ([]typeStruct.Post, error) {
 	var posts []typeStruct.Post
 
@@ -40,7 +43,7 @@ func ParseRSS(url string) ([]typeStruct.Post, error) {
 	}
 
 	for _, item := range feed.Items {
-		// Parse PubTime using the given format
+		// Парсинг времени публикации с использованием заданного формата
 		pubTime, err := time.Parse("Mon, 2 Jan 2006 15:04:05 MST", item.Published)
 		if err != nil {
 			return nil, err
@@ -58,7 +61,7 @@ func ParseRSS(url string) ([]typeStruct.Post, error) {
 	return posts, nil
 }
 
-// для тестирования с фикстурой rss
+// ParseRSSFixture выполняет парсинг фикстурного XML RSS-потока и возвращает список постов.
 func ParseRSSFixture(fixtureXML string) ([]typeStruct.Post, error) {
 	var posts []typeStruct.Post
 
@@ -69,7 +72,6 @@ func ParseRSSFixture(fixtureXML string) ([]typeStruct.Post, error) {
 	}
 
 	for _, item := range feed.Items {
-		// Parse PubTime using the given format
 		pubTime, err := time.Parse("Mon, 2 Jan 2006 15:04:05 MST", item.Published)
 		if err != nil {
 			return nil, err

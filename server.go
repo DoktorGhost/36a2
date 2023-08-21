@@ -63,18 +63,21 @@ func main() {
 	fmt.Println("Application has been stopped.")
 }
 
+// startParsingRoutine запускает рутину для обхода и парсинга RSS-ленты.
 func startParsingRoutine(url string, period int, stopCh <-chan struct{}, db *sql.DB) {
 	for {
 		select {
 		case <-stopCh:
 			return
 		default:
+			// Парсинг RSS-ленты
 			posts, err := parse.ParseRSS(url)
 			if err != nil {
 				log.Println("Failed to parse RSS:", err)
 				continue
 			}
 
+			// Сохранение постов в базу данных
 			for _, post := range posts {
 				err := database.SaveToDB(post)
 				if err != nil {
@@ -82,6 +85,7 @@ func startParsingRoutine(url string, period int, stopCh <-chan struct{}, db *sql
 				}
 			}
 
+			// Ожидание перед следующим обходом
 			time.Sleep(time.Duration(period) * time.Minute)
 		}
 	}
