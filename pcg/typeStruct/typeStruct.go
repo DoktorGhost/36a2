@@ -16,7 +16,7 @@ func (p *Post) FormatPubTime() string {
 */
 
 func (p *Post) GetSummary() string {
-	// Вернуть краткое описание новости, например, первые 100 символов содержания
+	// Вернуть краткое описание новости
 	maxLength := 100
 	if len(p.Content) > maxLength {
 		return p.Content[:maxLength] + "..."
