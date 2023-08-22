@@ -1,5 +1,3 @@
-# ОТРЕДАКТИРОВАТЬ!!!!
-
 # Разработка новостного агрегатора
 
 ### Функциональные требования:
@@ -20,5 +18,18 @@
   * ссылка на источник.
 
 
-docker build -t my-postgres .  
-docker run -d --name my-postgres-container -p 5432:5432 my-postgres
+
+# Запуск
+В приложении имеется dockerfile для запуска контейнера с postgres  
+Выполняем следующие команды:
+```docker
+  docker build -t my-postgres . 
+```
+```docker
+  docker run -d --name my-postgres-container -p 5432:5432 my-postgres 
+```
+Из корневого каталога приложения выполняем команду:
+```go
+  go run .
+```
+Переходим в браузере по адресу localhost:8080 (если не меняли порт) и видим 40 последних новостей.
